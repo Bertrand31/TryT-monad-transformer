@@ -44,13 +44,20 @@ case class TryT[F[_], A](value: F[Try[A]]) {
    */
   def mapK[G[_]](f: F ~> G): TryT[G, A] = TryT[G, A](f(value))
 
-  /* Run the side-effecting function on the result, then return said results
+  /* Run the side-effecting function on the inside value, then return the TryT untouched
    */
-  def tap(fn: A => Unit)(implicit F: Functor[F]): TryT[F, A] = TryT(
-    F.map(value)(_ map (inside => {
+  def tap(fn: A => Unit)(implicit F: Functor[F]): TryT[F, A] =
+    map(inside => {
       fn(inside)
       inside
-    }))
+    })
+
+  def filter(fn: A => Boolean)(implicit F: Functor[F]): TryT[F, A] = TryT(
+    F.map(value)(_ filter fn)
+  )
+
+  def collect[B](fn: PartialFunction[A, B])(implicit F: Functor[F]): TryT[F, B] = TryT(
+    F.map(value)(_ collect fn)
   )
 
   def isSuccess(implicit F: Functor[F]): F[Boolean] =
