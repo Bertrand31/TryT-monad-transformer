@@ -14,19 +14,35 @@ case class TryT[F[_], A](value: F[Try[A]]) {
     F.map(value)(_ map fn)
   )
 
-  def flatMap[B](fn: A => F[Try[B]])(implicit M: Monad[F]): TryT[F, B] = TryT(
-    M.flatMap(value)({
+  def transform[B](fn: Try[A] => Try[B])(implicit F: Functor[F]): TryT[F, B] = TryT(
+    F.map(value)(fn)
+  )
+
+  def flatTransform[B](fn: Try[A] => F[Try[B]])(implicit M: Monad[F]): TryT[F, B] = TryT(
+    M.flatMap(value)(fn)
+  )
+
+  def flatTransformT[B](fn: Try[A] => TryT[F, B])(implicit M: Monad[F]): TryT[F, B] = TryT(
+    M.flatMap(value)(fn(_).value)
+  )
+
+  def flatMap[B](fn: A => F[Try[B]])(implicit M: Monad[F]): TryT[F, B] =
+    flatTransform({
       case Failure(err) => M.pure(Failure(err))
       case Success(v) => fn(v)
     })
-  )
+
+  def flatMapT[B](fn: A => TryT[F, B])(implicit M: Monad[F]): TryT[F, B] =
+    flatTransformT({
+      case Failure(err) => TryT(M.pure(Failure(err)))
+      case Success(v) => fn(v)
+    })
 
   /** Flatmap over the 'inside' monad (i.e. Try), leaving the outer one intact.
     * It is the equivalent of doing `value.map(try => try.flatMap(fn))`.
     */
-  def subflatMap[B](fn: A => Try[B])(implicit F: Functor[F]): TryT[F, B] = TryT(
-    F.map(value)(_ >>= fn)
-  )
+  def subflatMap[B](fn: A => Try[B])(implicit F: Functor[F]): TryT[F, B] =
+    transform(_ >>= fn)
 
   def fold[C](fa: Throwable => C, fb: A => C)(implicit F: Functor[F]): F[C] =
     F.map(value)(_.fold(fa, fb))
@@ -35,14 +51,14 @@ case class TryT[F[_], A](value: F[Try[A]]) {
     F.flatMap(value)(_.fold(fa, fb))
 
   def bimap[C, D](fa: Throwable => Throwable, fb: A => D)(implicit F: Functor[F]): TryT[F, D] =
-    TryT(F.map(value)({
+    transform({
       case Failure(err) => Failure(fa(err))
       case Success(success) => Success(fb(success))
-    }))
+    })
 
   /** Apply the transformation `f` to the context `F`.
    */
-  def mapK[G[_]](f: F ~> G): TryT[G, A] = TryT[G, A](f(value))
+  def mapK[G[_]](f: F ~> G): TryT[G, A] = TryT(f(value))
 
   /* Run the side-effecting function on the inside value, then return the TryT untouched
    */
@@ -52,13 +68,11 @@ case class TryT[F[_], A](value: F[Try[A]]) {
       inside
     })
 
-  def filter(fn: A => Boolean)(implicit F: Functor[F]): TryT[F, A] = TryT(
-    F.map(value)(_ filter fn)
-  )
+  def filter(fn: A => Boolean)(implicit F: Functor[F]): TryT[F, A] =
+    transform(_ filter fn)
 
-  def collect[B](fn: PartialFunction[A, B])(implicit F: Functor[F]): TryT[F, B] = TryT(
-    F.map(value)(_ collect fn)
-  )
+  def collect[B](fn: PartialFunction[A, B])(implicit F: Functor[F]): TryT[F, B] =
+    transform(_ collect fn)
 
   def isSuccess(implicit F: Functor[F]): F[Boolean] =
     F.map(value)(_.isSuccess)
