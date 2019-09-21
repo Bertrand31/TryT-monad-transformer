@@ -24,7 +24,7 @@ There are two ways to wrap a value with the TryT wrapper. Either using the `pure
 TryT.pure[IO, String]("foo")
 // res0: utils.TryT[cats.effect.IO,String] = TryT(IO(Success(foo)))
 ```
-Or, the preffered and more useful way, using the standard apply method:
+Or, the preferred and more useful way, using the standard apply method:
 ```scala
 val asyncValue = IO(Try(3))
 TryT(asyncValue)
