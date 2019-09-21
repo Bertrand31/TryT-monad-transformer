@@ -1,5 +1,7 @@
 # TryT monad transformer
 
+## Introduction
+
 This monad transformer is born out of a -perceived- shortcoming of Cats.
 Because it seems that the Cats community encourages using Cats' Either for error handling instead of Scala's Try, they provide an EitherT monad transformer, but no TryT.
 
@@ -13,3 +15,25 @@ It really looks like a hybrid between EitherT and OptionT, with a little less fu
 The things that I've left out are mostly because either they don't apply to Try, or I do not understand them well enough yet.
 
 All contributions or suggestions are welcome!
+
+## Usage
+
+There are two ways to wrap a value with the TryT wrapper. Either using the `pure` function on a raw value:
+```scala
+TryT.pure[IO, String]("foo")
+// res0: utils.TryT[cats.effect.IO,String] = TryT(IO(Success(foo)))
+```
+Or, the preffered and more useful way, using the standard apply method:
+```scala
+val asyncValue = IO(Try(3))
+TryT(asyncValue)
+// res1: utils.TryT[cats.effect.IO,Int] = TryT(IO$1338210249)
+```
+From there, it's easy to operate on the TryT that acts like both monads (here, IO and Try) were fused together:
+```scala
+TryT(IO(Try(3))
+  .map(_ + 3)
+  .flatMap(number => Try { number / 6 })
+  .tap(println)
+```
+To see all the available methods, you can either look at [the source code](https://github.com/Bertrand31/TryT-monad-transformer/blob/master/src/main/scala/tryt/TryT.scala) or [the specs](https://github.com/Bertrand31/TryT-monad-transformer/blob/master/src/test/scala/tryt/TryTSpec.scala).
