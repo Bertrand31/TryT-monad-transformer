@@ -68,6 +68,9 @@ case class TryT[F[_], A](value: F[Try[A]]) {
       inside
     })
 
+  def ===(that: TryT[F, A])(implicit eq: Eq[F[Try[A]]]): Boolean =
+    eq.eqv(value, that.value)
+
   def filter(fn: A => Boolean)(implicit F: Functor[F]): TryT[F, A] =
     transform(_ filter fn)
 
