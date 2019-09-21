@@ -2,8 +2,9 @@
 
 ## Introduction
 
-This monad transformer is born out of a -perceived- shortcoming of Cats.
-Because it seems that the Cats community encourages using Cats' Either for error handling instead of Scala's Try, they provide an EitherT monad transformer, but no TryT.
+This monad transformer is born out of a personal preference for Try over Either for error handling.
+
+Because the Cats community encourages using Cats' Either for error handling instead of Scala's Try, they provide an EitherT monad transformer, but no TryT.
 
 However, I personally prefer using Try for error handling, as it seems to fit the job tighter: it is specific to error handling and can do nothing else.
 It also makes complete sense that it is "success-biased", whereas the fact that Cats' Either is right-biased always seeemed dubious to me. If it's really left or right, there's no reason for it to be biased towards either side.
