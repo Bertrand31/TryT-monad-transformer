@@ -7,7 +7,9 @@ version := "1.0"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.0.0",
-  "org.scalatest" %% "scalatest" % "3.0.8",
+  "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  "org.typelevel" %% "cats-laws" % "2.0.0" % Test,
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.14" % "1.2.3" % Test,
 )
 
 scalacOptions ++= Seq(

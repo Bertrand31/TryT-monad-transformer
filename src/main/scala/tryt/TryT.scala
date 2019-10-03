@@ -8,7 +8,7 @@ import scala.util.{Failure, Success, Try}
 /** A minimal equivalent of Cat's OptionT monad transformer, with Try instead of Option.
   * See here for OptionT explanations: https://typelevel.org/cats/datatypes/optiont.html
   */
-case class TryT[F[_], A](value: F[Try[A]]) {
+final case class TryT[F[_], A](value: F[Try[A]]) {
 
   def map[B](fn: A => B)(implicit F: Functor[F]): TryT[F, B] = TryT(
     F.map(value)(_ map fn)

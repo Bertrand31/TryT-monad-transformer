@@ -1,5 +1,10 @@
-import cats.data.OptionT
+import cats._
 import cats.implicits._
+import cats.data.OptionT
+import cats.kernel.laws.discipline.{EqTests, MonoidTests, OrderTests, PartialOrderTests, SemigroupTests}
+import cats.laws.discipline._
+import cats.laws.discipline.arbitrary._
+import cats.laws.discipline.eq._
 import org.scalatest.FlatSpec
 import scala.util.{Failure, Success, Try}
 import tryt.TryT
@@ -160,4 +165,13 @@ class TryTSpec extends FlatSpec {
 
     assert(TryT.pure[Option, Int](3).value == Some(Success(3)))
   }
+
+  implicit def eqTryT[A: Eq, B: Eq]: Eq[TryT[A, B]] = Eq.fromUniversalEquals
+
+  // it should "kek" in {
+
+    // forAll { (o: TryT[Option, Int]) =>
+      // o.isSuccess should ===(o.value.map(_.isSuccess))
+    // }
+  // }
 }

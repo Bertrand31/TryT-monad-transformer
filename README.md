@@ -34,7 +34,7 @@ From there, it's easy to operate on the TryT that acts like both monads (here, I
 ```scala
 TryT(IO(Try(3))
   .map(_ + 3)
-  .flatMap(number => Try { number / 6 })
+  .subflatMap(number => Try { number / 6 })
   .tap(println)
 ```
 To see all the available methods, you can either look at [the source code](https://github.com/Bertrand31/TryT-monad-transformer/blob/master/src/main/scala/tryt/TryT.scala) or [the specs](https://github.com/Bertrand31/TryT-monad-transformer/blob/master/src/test/scala/tryt/TryTSpec.scala).
