@@ -1,4 +1,3 @@
-import cats._
 import cats.implicits._
 import cats.data.OptionT
 import org.scalatest.FlatSpec
