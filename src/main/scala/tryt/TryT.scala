@@ -29,13 +29,13 @@ final case class TryT[F[_], A](value: F[Try[A]]) {
   def flatMap[B](fn: A => F[Try[B]])(implicit M: Monad[F]): TryT[F, B] =
     flatTransform({
       case Failure(err) => M.pure(Failure(err))
-      case Success(v) => fn(v)
+      case Success(v)   => fn(v)
     })
 
   def flatMapT[B](fn: A => TryT[F, B])(implicit M: Monad[F]): TryT[F, B] =
     flatTransformT({
       case Failure(err) => TryT(M.pure(Failure(err)))
-      case Success(v) => fn(v)
+      case Success(v)   => fn(v)
     })
 
   /** Flatmap over the 'inside' monad (i.e. Try), leaving the outer one intact.
@@ -52,7 +52,7 @@ final case class TryT[F[_], A](value: F[Try[A]]) {
 
   def bimap[C, D](fa: Throwable => Throwable, fb: A => D)(implicit F: Functor[F]): TryT[F, D] =
     transform({
-      case Failure(err) => Failure(fa(err))
+      case Failure(err)     => Failure(fa(err))
       case Success(success) => Success(fb(success))
     })
 
@@ -91,7 +91,7 @@ final case class TryT[F[_], A](value: F[Try[A]]) {
 
   def getOrElseF[AA >: A](default: => F[AA])(implicit F: Monad[F]): F[AA] =
     F.flatMap(value)({
-      case Failure(_)  => default
+      case Failure(_) => default
       case Success(b) => F.pure(b)
     })
 
@@ -100,7 +100,7 @@ final case class TryT[F[_], A](value: F[Try[A]]) {
 
   def valueOrF(f: Throwable => F[A])(implicit F: Monad[F]): F[A] =
     F.flatMap(value)({
-      case Failure(a)  => f(a)
+      case Failure(a) => f(a)
       case Success(b) => F.pure(b)
     })
 
